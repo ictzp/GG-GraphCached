@@ -1,0 +1,142 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ATOMIC_H	core/atomic.hpp	18;"	d
+BIGVECTOR_H	core/bigvector.hpp	18;"	d
+BITMAP_H	core/bitmap.hpp	18;"	d
+BIT_OFFSET	core/bitmap.hpp	21;"	d
+BigVector	core/bigvector.hpp	/^	BigVector() {$/;"	f	class:BigVector
+BigVector	core/bigvector.hpp	/^	BigVector(std::string path) {$/;"	f	class:BigVector
+BigVector	core/bigvector.hpp	/^	BigVector(std::string path, size_t length) {$/;"	f	class:BigVector
+BigVector	core/bigvector.hpp	/^class BigVector {$/;"	c
+Bitmap	core/bitmap.hpp	/^	Bitmap() {$/;"	f	class:Bitmap
+Bitmap	core/bitmap.hpp	/^	Bitmap(size_t size) {$/;"	f	class:Bitmap
+Bitmap	core/bitmap.hpp	/^class Bitmap {$/;"	c
+CHUNKSIZE	core/constants.hpp	20;"	d
+CONSTANTS_H	core/constants.hpp	18;"	d
+CXX	Makefile	/^CXX?= g++$/;"	m
+CXXFLAGS	Makefile	/^CXXFLAGS?= -O3 -Wall -std=c++11 -g -fopenmp -I$(ROOT_DIR)$/;"	m
+Edge	core/type.hpp	/^struct Edge {$/;"	s
+EdgeId	core/type.hpp	/^typedef long EdgeId;$/;"	t
+FILESYSTEM_H	core/filesystem.hpp	18;"	d
+GRAPH_H	core/graph.hpp	18;"	d
+Graph	core/graph.hpp	/^	Graph (std::string path) {$/;"	f	class:Graph
+Graph	core/graph.hpp	/^class Graph : public GraphCached<int, DiskComponent>{$/;"	c
+HEADERS	Makefile	/^HEADERS= $(shell find . -name '*.hpp')$/;"	m
+IOSIZE	core/constants.hpp	22;"	d
+K	examples/radii.cpp	19;"	d	file:
+MergeStatus	core/type.hpp	/^struct MergeStatus {$/;"	s
+PAGESIZE	core/bigvector.hpp	/^	static const long PAGESIZE = 4096;$/;"	m	class:BigVector
+PAGESIZE	core/graph.hpp	/^	long PAGESIZE;$/;"	m	class:Graph
+PAGESIZE	tools/preprocess.cpp	/^long PAGESIZE = 4096;$/;"	v
+PARTITION_H	core/partition.hpp	18;"	d
+QUEUE_H	core/queue.hpp	18;"	d
+Queue	core/queue.hpp	/^	Queue(const size_t capacity) : capacity(capacity) { }$/;"	f	class:Queue
+Queue	core/queue.hpp	/^class Queue {$/;"	c
+ROOT_DIR	Makefile	/^ROOT_DIR= $(shell pwd)$/;"	m
+TARGETS	Makefile	/^TARGETS= bin\/preprocess bin\/bfs bin\/wcc bin\/pagerank bin\/spmv bin\/mis bin\/radii$/;"	m
+TIME_H	core/time.hpp	18;"	d
+TYPE_H	core/type.hpp	18;"	d
+VertexId	core/type.hpp	/^typedef int VertexId;$/;"	t
+WORD_OFFSET	core/bitmap.hpp	20;"	d
+Weight	core/type.hpp	/^typedef float Weight;$/;"	t
+alloc_bitmap	core/graph.hpp	/^	Bitmap * alloc_bitmap() {$/;"	f	class:Graph
+begin_i	core/bigvector.hpp	/^	size_t begin_i = 0, end_i = 0;$/;"	m	class:BigVector
+begin_offset	core/type.hpp	/^  long begin_offset;$/;"	m	struct:MergeStatus
+buffer_pool	core/graph.hpp	/^	char ** buffer_pool;$/;"	m	class:Graph
+capacity	core/queue.hpp	/^	const size_t capacity;$/;"	m	class:Queue
+cas	core/atomic.hpp	/^inline bool cas(ET *ptr, ET oldv, ET newv) {$/;"	f
+clear	core/bitmap.hpp	/^	void clear() {$/;"	f	class:Bitmap
+close_mmap	core/bigvector.hpp	/^	void close_mmap() {$/;"	f	class:BigVector
+column_offset	core/graph.hpp	/^	long * column_offset;$/;"	m	class:Graph
+cond_empty	core/queue.hpp	/^	std::condition_variable cond_empty;$/;"	m	class:Queue
+cond_full	core/queue.hpp	/^	std::condition_variable cond_full;$/;"	m	class:Queue
+create_directory	core/filesystem.hpp	/^inline void create_directory(std::string path) {$/;"	f
+data	core/bigvector.hpp	/^	T * data;$/;"	m	class:BigVector
+data	core/bitmap.hpp	/^	unsigned long * data;$/;"	m	class:Bitmap
+data_in_memory	core/bigvector.hpp	/^	T * data_in_memory = NULL;$/;"	m	class:BigVector
+edge	tools/prepreprocess.py	/^	edge = line.split()$/;"	v
+edge_type	core/graph.hpp	/^	int edge_type;$/;"	m	class:Graph
+edge_unit	core/graph.hpp	/^	int edge_unit;$/;"	m	class:Graph
+edges	core/graph.hpp	/^	EdgeId edges;$/;"	m	class:Graph
+end_i	core/bigvector.hpp	/^	size_t begin_i = 0, end_i = 0;$/;"	m	class:BigVector
+end_offset	core/type.hpp	/^  long end_offset;$/;"	m	struct:MergeStatus
+f_none_1	core/graph.hpp	/^void f_none_1(std::pair<VertexId,VertexId> vid_range) {$/;"	f
+f_none_2	core/graph.hpp	/^void f_none_2(std::pair<VertexId,VertexId> source_vid_range, std::pair<VertexId,VertexId> target_vid_range) {$/;"	f
+f_true	core/graph.hpp	/^bool f_true(VertexId v) {$/;"	f
+fd	core/bigvector.hpp	/^	int fd;$/;"	m	class:BigVector
+file_exists	core/filesystem.hpp	/^inline bool file_exists(std::string filename) {$/;"	f
+file_size	core/filesystem.hpp	/^inline long file_size(std::string filename) {$/;"	f
+filename	tools/prepreprocess.py	/^filename = sys.argv[1]$/;"	v
+fill	core/bigvector.hpp	/^	void fill(const T & value) {$/;"	f	class:BigVector
+fill	core/bitmap.hpp	/^	void fill() {$/;"	f	class:Bitmap
+fsize	core/graph.hpp	/^	long ** fsize;$/;"	m	class:Graph
+generate_edge_grid	tools/preprocess.cpp	/^void generate_edge_grid(std::string input, std::string output, VertexId vertices, int partitions, int edge_type) {$/;"	f
+get_bit	core/bitmap.hpp	/^	unsigned long get_bit(size_t i) {$/;"	f	class:Bitmap
+get_partition_id	core/partition.hpp	/^inline size_t get_partition_id(const size_t vertices, const size_t partitions, const size_t vertex_id) {$/;"	f
+get_partition_range	core/partition.hpp	/^inline std::pair<size_t, size_t> get_partition_range(const size_t vertices, const size_t partitions, const size_t partition_id) {$/;"	f
+get_time	core/time.hpp	/^inline double get_time() {$/;"	f
+hint	core/graph.hpp	/^	void hint(BigVector<A> & a) {$/;"	f	class:Graph
+hint	core/graph.hpp	/^	void hint(BigVector<A> & a, BigVector<B> & b) {$/;"	f	class:Graph
+hint	core/graph.hpp	/^	void hint(BigVector<A> & a, BigVector<B> & b, BigVector<C> & c) {$/;"	f	class:Graph
+id	core/type.hpp	/^  int id;$/;"	m	struct:MergeStatus
+in_memory	core/bigvector.hpp	/^	bool in_memory = false;$/;"	m	class:BigVector
+infile	tools/prepreprocess.py	/^infile = open(filename, "r")$/;"	v
+init	core/bigvector.hpp	/^	void init(std::string path) {$/;"	f	class:BigVector
+init	core/bigvector.hpp	/^	void init(std::string path, size_t length) {$/;"	f	class:BigVector
+init	core/bitmap.hpp	/^	void init(size_t size) {$/;"	f	class:Bitmap
+init	core/graph.hpp	/^	void init(std::string path) {$/;"	f	class:Graph
+is_empty	core/queue.hpp	/^	bool is_empty() {$/;"	f	class:Queue
+is_full	core/queue.hpp	/^	bool is_full() {$/;"	f	class:Queue
+is_open	core/bigvector.hpp	/^	bool is_open;$/;"	m	class:BigVector
+length	core/bigvector.hpp	/^	size_t length;$/;"	m	class:BigVector
+load	core/bigvector.hpp	/^	void load(size_t begin_i, size_t end_i) {$/;"	f	class:BigVector
+lock	core/bigvector.hpp	/^	void lock(size_t begin_i, size_t end_i) {$/;"	f	class:BigVector
+main	examples/bfs.cpp	/^int main(int argc, char ** argv) {$/;"	f
+main	examples/mis.cpp	/^int main(int argc, char ** argv) {$/;"	f
+main	examples/pagerank.cpp	/^int main(int argc, char ** argv) {$/;"	f
+main	examples/radii.cpp	/^int main(int argc, char ** argv) {$/;"	f
+main	examples/spmv.cpp	/^int main(int argc, char ** argv) {$/;"	f
+main	examples/wcc.cpp	/^int main(int argc, char ** argv) {$/;"	f
+main	tools/preprocess.cpp	/^int main(int argc, char ** argv) {$/;"	f
+memory_bytes	core/graph.hpp	/^	long memory_bytes;$/;"	m	class:Graph
+mutex	core/queue.hpp	/^	std::mutex mutex;$/;"	m	class:Queue
+open_mmap	core/bigvector.hpp	/^	void open_mmap() {$/;"	f	class:BigVector
+operator []	core/bigvector.hpp	/^	T & operator[](size_t i) {$/;"	f	class:BigVector
+outfile	tools/prepreprocess.py	/^outfile = open(filename+".bi", "wb")$/;"	v
+parallelism	core/graph.hpp	/^	int parallelism;$/;"	m	class:Graph
+partition_batch	core/graph.hpp	/^	int partition_batch;$/;"	m	class:Graph
+partitions	core/graph.hpp	/^	int partitions;$/;"	m	class:Graph
+path	core/bigvector.hpp	/^	std::string path;$/;"	m	class:BigVector
+path	core/graph.hpp	/^	std::string path;$/;"	m	class:Graph
+plocate	core/graph.hpp	/^	DiskSegmentInfo plocate(int key) {$/;"	f	class:Graph
+pop	core/queue.hpp	/^	T pop() {$/;"	f	class:Queue
+push	core/queue.hpp	/^	void push(const T & item) {$/;"	f	class:Queue
+queue	core/queue.hpp	/^	std::queue<T> queue;$/;"	m	class:Queue
+remove_directory	core/filesystem.hpp	/^inline void remove_directory(std::string path) {$/;"	f
+row_offset	core/graph.hpp	/^	long * row_offset;$/;"	m	class:Graph
+save	core/bigvector.hpp	/^	void save() {$/;"	f	class:BigVector
+set_bit	core/bitmap.hpp	/^	void set_bit(size_t i) {$/;"	f	class:Bitmap
+set_memory_bytes	core/graph.hpp	/^	void set_memory_bytes(long memory_bytes) {$/;"	f	class:Graph
+set_partition_batch	core/graph.hpp	/^	void set_partition_batch(long bytes) {$/;"	f	class:Graph
+set_vertex_data_bytes	core/graph.hpp	/^	void set_vertex_data_bytes(long vertex_data_bytes) {$/;"	f	class:Graph
+should_access_shard	core/graph.hpp	/^	bool * should_access_shard;$/;"	m	class:Graph
+size	core/bitmap.hpp	/^	size_t size;$/;"	m	class:Bitmap
+source	core/type.hpp	/^	VertexId source;$/;"	m	struct:Edge
+stream_edges	core/graph.hpp	/^	T stream_edges(std::function<T(Edge&)> process, Bitmap * bitmap = nullptr, T zero = 0, int update_mode = 1,$/;"	f	class:Graph
+stream_vertices	core/graph.hpp	/^	T stream_vertices(std::function<T(VertexId)> process, Bitmap * bitmap = nullptr, T zero = 0,$/;"	f	class:Graph
+string	tools/prepreprocess.py	/^import string$/;"	i
+struct	tools/prepreprocess.py	/^import struct$/;"	i
+sync	core/bigvector.hpp	/^	void sync() {$/;"	f	class:BigVector
+sys	tools/prepreprocess.py	/^import sys$/;"	i
+target	core/type.hpp	/^	VertexId target;$/;"	m	struct:Edge
+unlock	core/bigvector.hpp	/^	void unlock(size_t begin_i, size_t end_i) {$/;"	f	class:BigVector
+vertex_data_bytes	core/graph.hpp	/^	long vertex_data_bytes;$/;"	m	class:Graph
+vertices	core/graph.hpp	/^	VertexId vertices;$/;"	m	class:Graph
+weight	core/type.hpp	/^	Weight weight;$/;"	m	struct:Edge
+write_add	core/atomic.hpp	/^inline void write_add(ET *a, ET b) {$/;"	f
+write_min	core/atomic.hpp	/^inline bool write_min(ET *a, ET b) {$/;"	f
+~BigVector	core/bigvector.hpp	/^	~BigVector() {$/;"	f	class:BigVector
