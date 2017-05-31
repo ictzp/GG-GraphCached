@@ -1,0 +1,1 @@
+sudo systemd-run -p MemoryLimit=1G -p LimitNOFILE=40000 --setenv=LD_LIBRARY_PATH=/usr/local/lib --setenv=WorkingDirectory=/home/zhaopeng/graph/GG-GraphCached -t ./bin/wcc -m 0 /home/zhaopeng/graph/data/twitter-2010.gg/
