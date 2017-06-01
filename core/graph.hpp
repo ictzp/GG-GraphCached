@@ -42,6 +42,7 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include "GraphCached.h"
 
 using namespace graphcached;
+#define PARTITION_TRACE 1
 
 bool f_true(VertexId v) {
 	return true;
@@ -350,7 +351,8 @@ public:
 		//std::cout<<"Stream_Edge called!"<<std::endl;
 		switch(update_mode) {
 		case 0: // source oriented update
-			threads.clear();
+        {
+            threads.clear();
 			for (int ti=0;ti<parallelism;ti++) {
 				threads.emplace_back([&](int thread_id){
 					T local_value = zero;
@@ -379,8 +381,8 @@ public:
 							Edge & e = *(Edge*)(buffer+pos);
 							//if (pos < 5 * edge_unit)
 							//	std::cout<<"Source: " <<e.source<<" - Target: "<<e.target<<std::endl;
-							if (e.source > 41652999 || e.target > 41652999)
-								std::cout<<"Overflow: "<<e.source<<" -> "<<e.target<<" pos = "<<pos<<" size = "<<partition->dsi._size<<std::endl;
+							//if (e.source > 41652999 || e.target > 41652999)
+							//	std::cout<<"Overflow: "<<e.source<<" -> "<<e.target<<" pos = "<<pos<<" size = "<<partition->dsi._size<<std::endl;
 							if (bitmap==nullptr || bitmap->get_bit(e.source)) {
 								local_value += process(e);
 							}
@@ -395,7 +397,11 @@ public:
 			}
 			fin = open((path+"/row").c_str(), read_mode);
 			posix_fadvise(fin, 0, 0, POSIX_FADV_SEQUENTIAL);
-			
+
+#if PARTITION_TRACE == 1
+            int ftrace = open("v_trace", O_CREAT|O_WRONLY|O_APPEND, 0600);
+#endif
+
 			for (int i=0;i<partitions;i++) {
 				if (!should_access_shard[i]) continue;
 				for (int j=0;j<partitions;j++) {
@@ -403,8 +409,13 @@ public:
 					for (int k= 0; k < pnumber[index]; k++) {
 						//std::cout<<"("<<i<<", "<<j<<", "<<k<<")"<<std::endl;
 						tasks.push(std::make_tuple(i, j, k));
-						auto tmp = std::make_tuple(i, j, k);
-						char* tmpp = reinterpret_cast<char*>(&tmp);
+#if PARTITION_TRACE == 1
+                        char tmp[64];
+                        int len = sprintf(tmp, "%d %d %d\n", i, j, k);
+                        ::write(ftrace, tmp, len);
+#endif
+                        //auto tmp = std::make_tuple(i, j, k);
+						//char* tmpp = reinterpret_cast<char*>(&tmp);
 						//std::cout<<"key: ";
 						//for(int ii = 0; ii < sizeof(tmp); ii++)
 						//	std::cout<<std::setw(2)<<std::setfill('0')<<std::hex<<(int)tmpp[ii]<<" ";
@@ -412,6 +423,9 @@ public:
 					}
 				}
 			}
+#if PARTITION_TRACE == 1
+            close(ftrace);
+#endif
 			for (int i=0;i<parallelism;i++) {
 				tasks.push(std::make_tuple(-1, 0, 0));
 			}
@@ -419,6 +433,7 @@ public:
 				threads[i].join();
 			}
 			break;
+        }
 		case 1: // target oriented update
 			fin = open((path+"/column").c_str(), read_mode);
 			posix_fadvise(fin, 0, 0, POSIX_FADV_SEQUENTIAL);

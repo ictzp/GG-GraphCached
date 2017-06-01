@@ -1,12 +1,15 @@
 
 ROOT_DIR= $(shell pwd)
-TARGETS= bin/preprocess bin/bfs bin/wcc bin/pagerank bin/spmv bin/mis bin/radii
+TARGETS= bin/loc bin/preprocess bin/bfs bin/wcc bin/pagerank bin/spmv bin/mis bin/radii
 
 CXX?= g++
 CXXFLAGS?= -O3 -Wall -std=c++11 -g -fopenmp -I$(ROOT_DIR) -lmemcached
 HEADERS= $(shell find . -name '*.hpp')
 
 all: $(TARGETS)
+
+bin/loc: tools/fp.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $< $(SYSLIBS)
 
 bin/preprocess: tools/preprocess.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(SYSLIBS)
