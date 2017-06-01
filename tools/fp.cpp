@@ -397,7 +397,7 @@ int main(int argc, char** argv) {
     int acctimes = 0;
     while(fscanf(ftrace, "%llu %llu %llu\n", &i, &j, &k) != EOF) {
         // convert (i:16, j:16, k:32) to uint64_t
-        if (i&0xffffull || j & 0xffffull || k & 0xffffffffull){
+        if (i&0xffffffffffff0000ull || j & 0xffffffffffff0000ull || k & 0xffffffff00000000ull){
             printf("one or more of the values in (i, j, k) overflow\n");
             return 0;
         }
