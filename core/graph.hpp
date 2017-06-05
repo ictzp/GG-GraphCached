@@ -42,7 +42,7 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include "GraphCached.h"
 
 using namespace graphcached;
-#define PARTITION_TRACE 0
+#define PARTITION_TRACE 1
 
 bool f_true(VertexId v) {
 	return true;
@@ -76,7 +76,7 @@ class Graph : public GraphCached<KeyTy, DiskComponent> {
 	size_t** psize; 
 public:
 	std::string path;
-
+        int fd;
 	int edge_type;
 	VertexId vertices;
 	EdgeId edges;
@@ -102,7 +102,7 @@ public:
 	    long offset = poffset[i*partitions+j][k];
 	    long size = psize[i*partitions+j][k]; 
 	    //std::cout<<"plocate: filename: "<<path+"/row" <<" offset: "<<offset<<" size: "<<size<<std::endl;
-	    DiskSegmentInfo dsi(path+"/row", offset, size);
+	    DiskSegmentInfo dsi(fd, offset, size);
 	    return dsi;
 	}
 
@@ -117,6 +117,7 @@ public:
 	void init(std::string path) {
 		this->path = path;
 
+	        fd = open((path+"/row").c_str(), O_RDONLY|O_DIRECT);
 		FILE * fin_meta = fopen((path+"/meta").c_str(), "r");
 		fscanf(fin_meta, "%d %d %ld %d", &edge_type, &vertices, &edges, &partitions);
 		fclose(fin_meta);
@@ -368,7 +369,7 @@ public:
 						//std::cout <<thread_id<<" : "<<std::get<0>(key) <<" "<<std::get<1>(key)<<" " <<std::get<2>(key) <<std::endl;	
 						//screen.unlock();
 						DiskComponent* partition = read(key);
-						char* buffer = reinterpret_cast<char*>(partition->data);
+						char* buffer = reinterpret_cast<char*>(partition->data());
 						auto pdsi = &(partition->dsi);
 						//if (std::get<0>(key) == 3 && std::get<1>(key) == 3) {
 						//char fn[1024];
@@ -395,11 +396,11 @@ public:
 					write_add(&read_bytes, local_read_bytes);
 				}, ti);
 			}
-			fin = open((path+"/row").c_str(), read_mode);
-			posix_fadvise(fin, 0, 0, POSIX_FADV_SEQUENTIAL);
+			//fin = open((path+"/row").c_str(), read_mode);
+			//posix_fadvise(fin, 0, 0, POSIX_FADV_SEQUENTIAL);
 
 #if PARTITION_TRACE == 1
-            int ftrace = open("v_trace", O_CREAT|O_WRONLY|O_APPEND, 0600);
+            int ftrace = open("gridgraph_wcc_partition.trace", O_CREAT|O_WRONLY|O_APPEND, 0600);
 #endif
 
 			for (int i=0;i<partitions;i++) {
@@ -411,7 +412,8 @@ public:
 						tasks.push(std::make_tuple(i, j, k));
 #if PARTITION_TRACE == 1
                         char tmp[64];
-                        int len = sprintf(tmp, "%d %d %d\n", i, j, k);
+			int index = i * partitions + j;
+                        int len = sprintf(tmp, "%d %d %d %d\n", i, j, k, psize[index][k]);
                         ::write(ftrace, tmp, len);
 #endif
                         //auto tmp = std::make_tuple(i, j, k);
