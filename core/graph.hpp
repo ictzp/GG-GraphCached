@@ -42,7 +42,7 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include "GraphCached.h"
 
 using namespace graphcached;
-#define PARTITION_TRACE 1
+#define PARTITION_TRACE 0
 
 bool f_true(VertexId v) {
 	return true;
