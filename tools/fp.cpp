@@ -23,6 +23,7 @@ map<uint64_t, double> footprint_avg;
 map<uint64_t, uint64_t> wb;
 map<uint64_t, uint64_t> w;
 map<uint64_t, uint64_t> twb;
+map<uint64_t, int> partitionsize;
 
 //map<uint64_t, uint64_t> first_access_time;
 
@@ -389,28 +390,42 @@ void reset() {
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        printf("Usage: ./bin/loc <filename>\n");
+        printf("Usage: ./bin/psize_hist <filename>\n");
         return 0;
     }
     FILE* ftrace = fopen(argv[1], "r");
     uint64_t i, j ,k;
+    int psize;
+    int psize_hist[24] = {0};
     int acctimes = 0;
-    while(fscanf(ftrace, "%llu %llu %llu\n", &i, &j, &k) != EOF) {
+    while(fscanf(ftrace, "%llu %llu %llu %d\n", &i, &j, &k, &psize) != EOF) {
         // convert (i:16, j:16, k:32) to uint64_t
-        if (i&0xffffffffffff0000ull || j & 0xffffffffffff0000ull || k & 0xffffffff00000000ull){
+        if ((i&0xffffffffffff0000ull) || (j & 0xffffffffffff0000ull) || (k & 0xffffffff00000000ull)){
             printf("one or more of the values in (i, j, k) overflow\n");
             return 0;
         }
-        uint64_t addr = (i<48) | (j<32) | k;
+        uint64_t addr = (uint64_t)(i<<48) | (uint64_t)(j<<32) | k;
         access(addr, 0);  
         acctimes++;
+	//int index;
+	//if((index = psize/(1024*1024)) == 24) index = 23;
+	//psize_hist[index]++;
+	partitionsize[addr] = psize;
     }
     cout<< acctimes << " accesses" << endl;
     fclose(ftrace);
     
-    RTtoFP();
-    for (int i = 1; i < acctimes - 1; i++)
-        cout<< FPtoMR(i) <<endl;
+    for (std::map<uint64_t, int>::iterator it = partitionsize.begin(); it != partitionsize.end(); it++) {
+        int index;
+	if ((index = it->second/(1024*1024)) == 24) index = 23;
+	psize_hist[index]++;
+    }
+
+    for (int i = 0; i < 24; i++)
+        cout<<psize_hist[i]<<endl;
+    //RTtoFP();
+    //for (int i = 1; i < acctimes - 1; i++)
+    //    cout<< FPtoMR(i) <<endl;
     return 0;
 }
 /*

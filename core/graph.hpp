@@ -42,7 +42,7 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include "GraphCached.h"
 
 using namespace graphcached;
-#define PARTITION_TRACE 0
+#define PARTITION_TRACE 1
 
 bool f_true(VertexId v) {
 	return true;
@@ -59,7 +59,41 @@ void f_none_2(std::pair<VertexId,VertexId> source_vid_range, std::pair<VertexId,
 using KeyTy = std::tuple<int, int, int>;
 static KeyTy null_key = std::make_tuple(-1, 0, 0);
 
-class Graph : public GraphCached<KeyTy, DiskComponent> {
+namespace std{
+template <>
+struct hash<KeyTy> {
+    std::size_t operator()(const KeyTy& key) const{
+        using std::hash;
+	using std::get;
+	return (  hash<int>()(get<0>(key))
+	        ^ hash<int>()(get<1>(key))
+		^ hash<int>()(get<2>(key)));
+    }
+};
+} // namespace std
+
+// tuple ostream impl
+template<std::size_t> struct int_{};
+
+template <class Tuple, size_t Pos>
+std::ostream& print_tuple(std::ostream& out, const Tuple& t, int_<Pos> ) {
+    out << std::get< std::tuple_size<Tuple>::value-Pos >(t) << ',';
+    return print_tuple(out, t, int_<Pos-1>());
+}
+
+template <class Tuple>
+std::ostream& print_tuple(std::ostream& out, const Tuple& t, int_<1> ) {
+    return out << std::get<std::tuple_size<Tuple>::value-1>(t);
+}
+
+template <class... Args>
+std::ostream& operator<<(std::ostream& out, const std::tuple<Args...>& t) {
+    out << '(';
+    print_tuple(out, t, int_<sizeof...(Args)>()); 
+    return out << ')';
+}
+
+class Graph : public GraphCached<KeyTy, DiskComponent<KeyTy>> {
 	int parallelism;
 	int edge_unit;
 	bool * should_access_shard;
@@ -73,7 +107,9 @@ class Graph : public GraphCached<KeyTy, DiskComponent> {
 	long PAGESIZE;
 	int* pnumber;
 	off_t** poffset; 
-	size_t** psize; 
+	size_t** psize;
+	uint32_t cacheLineSize;
+	int accesstime;
 public:
 	std::string path;
         int fd;
@@ -82,8 +118,10 @@ public:
 	EdgeId edges;
 	int partitions;
 
-	Graph (std::string path) {
+	Graph (std::string path, uint64_t cs = 4*1024*1024*1024ull, uint32_t clsp = 12, uint64_t mps = 24*1024*1024ull): GraphCached(path, clsp, cs, mps) {
 		PAGESIZE = 4096;
+		cacheLineSize = 1u<<clsp;
+		accesstime = 0;
 		//parallelism = 1;
 		parallelism = std::thread::hardware_concurrency();
 		buffer_pool = new char * [parallelism*1];
@@ -368,9 +406,9 @@ public:
 						//screen.lock();
 						//std::cout <<thread_id<<" : "<<std::get<0>(key) <<" "<<std::get<1>(key)<<" " <<std::get<2>(key) <<std::endl;	
 						//screen.unlock();
-						DiskComponent* partition = read(key);
-						char* buffer = reinterpret_cast<char*>(partition->data());
-						auto pdsi = &(partition->dsi);
+						DiskComponent<KeyTy>* partition = read(key);
+						char* buffer = reinterpret_cast<char*>(partition->addr);
+						//auto pdsi = &(partition->dsi);
 						//if (std::get<0>(key) == 3 && std::get<1>(key) == 3) {
 						//char fn[1024];
 						//sprintf(fn, "%d-%d.bin", pdsi->_offset, pdsi->_size);
@@ -388,7 +426,8 @@ public:
 								local_value += process(e);
 							}
 						}
-						if (!partition->release()) delete partition;
+						release(partition);
+						//if (!partition->release()) delete partition;
 						//std::cout <<"Finished: "<<pdsi->_filename<<" offset: "<<pdsi->_offset<<" size: "<<pdsi->_size<<std::endl;
 						
 					}
@@ -411,10 +450,14 @@ public:
 						//std::cout<<"("<<i<<", "<<j<<", "<<k<<")"<<std::endl;
 						tasks.push(std::make_tuple(i, j, k));
 #if PARTITION_TRACE == 1
+                        accesstime++;
                         char tmp[64];
 			int index = i * partitions + j;
-                        int len = sprintf(tmp, "%d %d %d %d\n", i, j, k, psize[index][k]);
-                        ::write(ftrace, tmp, len);
+			int nCacheLines = (psize[index][k] + cacheLineSize - 1) / cacheLineSize;
+			for (int ii = 0; ii < nCacheLines; ii++) {
+			    int len = sprintf(tmp, "%d %d %d %d %d\n", i, j, k, ii, accesstime);
+                            ::write(ftrace, tmp, len);
+			}
 #endif
                         //auto tmp = std::make_tuple(i, j, k);
 						//char* tmpp = reinterpret_cast<char*>(&tmp);
