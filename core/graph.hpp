@@ -42,7 +42,7 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include "GraphCached.h"
 
 using namespace graphcached;
-#define PARTITION_TRACE 1
+#define PARTITION_TRACE 0
 
 bool f_true(VertexId v) {
 	return true;
@@ -118,7 +118,7 @@ public:
 	EdgeId edges;
 	int partitions;
 
-	Graph (std::string path, uint64_t cs = 4*1024*1024*1024ull, uint32_t clsp = 12, uint64_t mps = 24*1024*1024ull): GraphCached(path, clsp, cs, mps) {
+	Graph (std::string path, uint64_t cs = 4*1024*1024*1024ull, uint32_t clsp = 20, uint64_t mps = 24*1024*1024ull): GraphCached(path, clsp, cs, mps) {
 		PAGESIZE = 4096;
 		cacheLineSize = 1u<<clsp;
 		accesstime = 0;
@@ -439,7 +439,7 @@ public:
 			//posix_fadvise(fin, 0, 0, POSIX_FADV_SEQUENTIAL);
 
 #if PARTITION_TRACE == 1
-            int ftrace = open("gridgraph_wcc_partition.trace", O_CREAT|O_WRONLY|O_APPEND, 0600);
+            int ftrace = open("gridgraph_wcc_partition_1m.trace", O_CREAT|O_WRONLY|O_APPEND, 0600);
 #endif
 
 			for (int i=0;i<partitions;i++) {
