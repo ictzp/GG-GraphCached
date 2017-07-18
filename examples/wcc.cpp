@@ -25,6 +25,7 @@ int main(int argc, char ** argv) {
 	//GraphCached_init(argc, argv);
 	uint64_t cacheSize = atoi(argv[1]) * 1024 * 1024 * 1024ull;
 	Graph graph(path, cacheSize);
+	graph.startCacheap();
 	Bitmap * active_in = graph.alloc_bitmap();
 	Bitmap * active_out = graph.alloc_bitmap();
 	BigVector<VertexId> label(graph.path+"/label", graph.vertices);

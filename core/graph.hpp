@@ -35,7 +35,7 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include "core/type.hpp"
 #include "core/bitmap.hpp"
 #include "core/atomic.hpp"
-#include "core/queue.hpp"
+//#include "core/queue.hpp"
 #include "core/partition.hpp"
 #include "core/bigvector.hpp"
 #include "core/time.hpp"
@@ -364,7 +364,7 @@ public:
 		}
 
 		T value = zero;
-		Queue<KeyTy> tasks(65536);
+		//Queue<KeyTy> tasks(65536);
 		std::vector<std::thread> threads;
 		long read_bytes = 0;
 
@@ -397,16 +397,18 @@ public:
 					T local_value = zero;
 					long local_read_bytes = 0;
 					while (true) {
-						auto key = tasks.pop();
-						if (std::get<0>(key)==-1) {
+						//auto key = tasks.pop();
+						//if (std::get<0>(key)==-1) {
 						    //std::cout<<thread_id<<" exit"<<std::endl;
-						    break;
-						}
+						//    break;
+						//}
 						// CHECK: start position should be offset % edge_unit
 						//screen.lock();
 						//std::cout <<thread_id<<" : "<<std::get<0>(key) <<" "<<std::get<1>(key)<<" " <<std::get<2>(key) <<std::endl;	
 						//screen.unlock();
-						DiskComponent<KeyTy>* partition = read(key);
+					        DiskComponent<KeyTy>* partition = get();
+						if (partition == nullptr) break;
+						//DiskComponent<KeyTy>* partition = read(key);
 						char* buffer = reinterpret_cast<char*>(partition->addr);
 						//auto pdsi = &(partition->dsi);
 						//if (std::get<0>(key) == 3 && std::get<1>(key) == 3) {
@@ -448,7 +450,7 @@ public:
 					int index = i * partitions + j;
 					for (int k= 0; k < pnumber[index]; k++) {
 						//std::cout<<"("<<i<<", "<<j<<", "<<k<<")"<<std::endl;
-						tasks.push(std::make_tuple(i, j, k));
+						request(std::make_tuple(i, j, k));
 #if PARTITION_TRACE == 1
                         accesstime++;
                         char tmp[64];
@@ -472,7 +474,7 @@ public:
             close(ftrace);
 #endif
 			for (int i=0;i<parallelism;i++) {
-				tasks.push(std::make_tuple(-1, 0, 0));
+				request(std::make_tuple(-1, 0, 0));
 			}
 			for (int i=0;i<parallelism;i++) {
 				threads[i].join();
@@ -501,7 +503,7 @@ public:
 						while (true) {
 							int fin;
 							long offset, length;
-							std::tie(fin, offset, length) = tasks.pop();
+							//std::tie(fin, offset, length) = tasks.pop();
 							if (fin==-1) break;
 							char * buffer = buffer_pool[thread_id];
 							long bytes = pread(fin, buffer, length, offset);
@@ -534,17 +536,17 @@ public:
 						long end_offset = column_offset[j*partitions+i+1];
 						if (end_offset <= offset) continue;
 						while (end_offset - offset >= IOSIZE) {
-							tasks.push(std::make_tuple(fin, offset, IOSIZE));
+							//tasks.push(std::make_tuple(fin, offset, IOSIZE));
 							offset += IOSIZE;
 						}
 						if (end_offset > offset) {
-							tasks.push(std::make_tuple(fin, offset, (end_offset - offset + PAGESIZE - 1) / PAGESIZE * PAGESIZE));
+							//tasks.push(std::make_tuple(fin, offset, (end_offset - offset + PAGESIZE - 1) / PAGESIZE * PAGESIZE));
 							offset += (end_offset - offset + PAGESIZE - 1) / PAGESIZE * PAGESIZE;
 						}
 					}
 				}
 				for (int i=0;i<parallelism;i++) {
-					tasks.push(std::make_tuple(-1, 0, 0));
+					//tasks.push(std::make_tuple(-1, 0, 0));
 				}
 				for (int i=0;i<parallelism;i++) {
 					threads[i].join();
