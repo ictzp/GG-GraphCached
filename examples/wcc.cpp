@@ -49,6 +49,7 @@ int main(int argc, char ** argv) {
 			if (label[e.source]<label[e.target]) {
 				if (write_min(&label[e.target], label[e.source])) {
 					active_out->set_bit(e.target);
+					graph.laHint(e.target);
 					return 1;
 				}
 			}

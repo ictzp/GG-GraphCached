@@ -110,6 +110,7 @@ class Graph : public GraphCached<KeyTy, DiskComponent<KeyTy>> {
 	size_t** psize;
 	uint32_t cacheLineSize;
 	int accesstime;
+	bool* laFlag;
 public:
 	std::string path;
         int fd;
@@ -167,7 +168,7 @@ public:
 		}
 
 		should_access_shard = new bool[partitions];
-
+		laFlag = new bool[partitions];
 		if (edge_type==0) {
 			edge_unit = sizeof(VertexId) * 2;
 		} else {
@@ -235,6 +236,14 @@ public:
 
 	Bitmap * alloc_bitmap() {
 		return new Bitmap(vertices);
+	}
+
+	void laHint(size_t i) {
+            size_t pid = get_partition_id(vertices, partitions, i);
+	    if (laFlag[pid] == 0) {
+	        hintQ->push(pid);
+	        laFlag[pid] = 1;
+	    }
 	}
 
 	template <typename T>
@@ -331,6 +340,8 @@ public:
 		long bytes = sizeof(A) * a.length + sizeof(B) * b.length + sizeof(C) * c.length;
 		set_partition_batch(bytes);
 	}
+        
+
 
 	template <typename T>
 	T stream_edges(std::function<T(Edge&)> process, Bitmap * bitmap = nullptr, T zero = 0, int update_mode = 0,
@@ -406,9 +417,13 @@ public:
 						//screen.lock();
 						//std::cout <<thread_id<<" : "<<std::get<0>(key) <<" "<<std::get<1>(key)<<" " <<std::get<2>(key) <<std::endl;	
 						//screen.unlock();
-					        DiskComponent<KeyTy>* partition = get();
+					       
+						DiskComponent<KeyTy>* partition = get();
 						if (partition == nullptr) break;
 						//DiskComponent<KeyTy>* partition = read(key);
+						for (int i = 0; i < partitions; i++) {
+						    laFlag[i] = 0;
+						}
 						char* buffer = reinterpret_cast<char*>(partition->addr);
 						//auto pdsi = &(partition->dsi);
 						//if (std::get<0>(key) == 3 && std::get<1>(key) == 3) {
@@ -479,6 +494,7 @@ public:
 			for (int i=0;i<parallelism;i++) {
 				threads[i].join();
 			}
+		        release(nullptr);	
 			break;
         }
 		case 1: // target oriented update
