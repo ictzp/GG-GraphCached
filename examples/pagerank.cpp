@@ -25,8 +25,8 @@ int main(int argc, char ** argv) {
 	int iterations = atoi(argv[2]);
 	long memory_bytes = (argc>=4)?atol(argv[3])*1024l*1024l*1024l:8l*1024l*1024l*1024l;
 
-	Graph graph(path);
-	graph.set_memory_bytes(memory_bytes);
+	Graph graph(path, memory_bytes);
+	graph.startCacheap();
 	BigVector<VertexId> degree(graph.path+"/degree", graph.vertices);
 	BigVector<float> pagerank(graph.path+"/pagerank", graph.vertices);
 	BigVector<float> sum(graph.path+"/sum", graph.vertices);

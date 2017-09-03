@@ -24,8 +24,8 @@ int main(int argc, char ** argv) {
 	std::string path = argv[1];
 	long memory_bytes = ((argc>=3)?atol(argv[2]):8l) * (1024l*1024l*1024l);
 
-	Graph graph(path);
-	graph.set_memory_bytes(memory_bytes);
+	Graph graph(path, memory_bytes);
+	graph.startCacheap();
 	Bitmap * active_in = graph.alloc_bitmap();
 	Bitmap * active_out = graph.alloc_bitmap();
 	BigVector<bool> in_mis(graph.path+"/in_mis", graph.vertices);
@@ -53,6 +53,7 @@ int main(int argc, char ** argv) {
 		VertexId next_active_vertices = graph.stream_vertices<VertexId>([&](VertexId i){
 			if (in_mis[i]) {
 				active_out->set_bit(i);
+				graph.laHint(i);
 				return 1;
 			} else {
 				in_mis[i] = true;
@@ -65,7 +66,7 @@ int main(int argc, char ** argv) {
 	double end_time = get_time();
 	printf("in_mis: %d\n", active_vertices);
 	printf("time: %.2f seconds\n", end_time - start_time);
-
+        graph.stat();
 	return 0;
 }
 

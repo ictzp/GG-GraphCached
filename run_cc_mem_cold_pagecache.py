@@ -17,11 +17,11 @@ def run_cc(filename, k):
 	pid = get_pid("./bin/wcc")
 	print pid
 	print "monitor starts"
-	moniter = subprocess.Popen(["/home/zhaopeng/graph/GG-GraphCached/tools/io_monitor.sh", pid, "wcc_2G_2_16G_directio_cacheap_1M_new.result"])
+	moniter = subprocess.Popen(["/home/zhaopeng/graph/GG-GraphCached/tools/io_monitor.sh", pid, "wcc_2G_2_16G_directio_cacheap_1M_lru_withouthint.result"])
 	t = p.stdout.read()
 	moniter.kill()
 	print "monitor stops"
-	f = open("wcc_coldpagecache_2G_2_16G_twitter_directio_cacheap_1M_new.result", "a")
+	f = open("wcc_coldpagecache_2G_2_16G_twitter_directio_cacheap_1M_lru_withouthint.result", "a")
 	f.write(t)
 	print t
 
