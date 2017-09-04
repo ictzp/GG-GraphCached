@@ -30,6 +30,7 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <atomic>
 
 #include "core/constants.hpp"
 #include "core/type.hpp"
@@ -110,7 +111,7 @@ class Graph : public GraphCached<KeyTy, DiskComponent<KeyTy>> {
 	size_t** psize;
 	uint32_t cacheLineSize;
 	int accesstime;
-	bool* laFlag;
+    std::atomic<bool>* laFlag;
 public:
 	std::string path;
         int fd;
@@ -168,7 +169,7 @@ public:
 		}
 
 		should_access_shard = new bool[partitions];
-		laFlag = new bool[partitions];
+		laFlag = new std::atomic<bool>[partitions];
 		if (edge_type==0) {
 			edge_unit = sizeof(VertexId) * 2;
 		} else {
@@ -239,11 +240,13 @@ public:
 	}
 
 	void laHint(size_t i) {
-            size_t pid = get_partition_id(vertices, partitions, i);
-	    if (laFlag[pid] == 0) {
-	        hintQ->push(pid);
-	        laFlag[pid] = 1;
-	    }
+        size_t pid = get_partition_id(vertices, partitions, i);
+	    // fast path
+        if (laFlag[pid] == 1)
+            return;
+        bool tmp = 1;
+        std::atomic_exchange(&laFlag[pid], tmp);
+        hintQ->push(pid);
 	}
 
 	template <typename T>
@@ -407,6 +410,9 @@ public:
 				threads.emplace_back([&](int thread_id){
 					T local_value = zero;
 					long local_read_bytes = 0;
+					for (int i = 0; i < partitions; i++) {
+					    laFlag[i] = 0;
+					}
 					while (true) {
 						//auto key = tasks.pop();
 						//if (std::get<0>(key)==-1) {
@@ -421,9 +427,6 @@ public:
 						DiskComponent<KeyTy>* partition = get();
 						if (partition == nullptr) break;
 						//DiskComponent<KeyTy>* partition = read(key);
-						for (int i = 0; i < partitions; i++) {
-						    laFlag[i] = 0;
-						}
 						char* buffer = reinterpret_cast<char*>(partition->addr);
 						//auto pdsi = &(partition->dsi);
 						//if (std::get<0>(key) == 3 && std::get<1>(key) == 3) {
