@@ -427,7 +427,34 @@ public:
 						DiskComponent<KeyTy>* partition = get();
 						if (partition == nullptr) break;
 						//DiskComponent<KeyTy>* partition = read(key);
-						char* buffer = reinterpret_cast<char*>(partition->addr);
+						if (partition->part == 1) {
+                            partition->pMutex.lock();
+                            if (partition->part1 == 1) {
+                                char* buffer = reinterpret_cast<char*>(partition->addr);
+                                for (long pos=0; pos+edge_unit<=partition->curSize; pos+=edge_unit) {
+                                    Edge & e = *(Edge*)(buffer+pos);
+                                    if (bitmap==nullptr || bitmap->get_bit(e.source)) {
+                                        local_value += process(e);
+                                    }
+                                }
+                                partition->part1 = 0;
+                                partition->pMutex.unlock();
+                            }
+                            else {
+                                char* buffer = reinterpret_cast<char*>(partition->addr);
+                                for (long pos=partition->preCurSize; pos+edge_unit<=partition->dsi._size; pos+=edge_unit) {
+                                    Edge & e = *(Edge*)(buffer+pos);
+                                    if (bitmap==nullptr || bitmap->get_bit(e.source)) {
+                                        local_value += process(e);
+                                    }
+                                }
+                                partition->part = 0;
+                                partition->pMutex.unlock();
+                                release(partition);
+                            }
+                        }
+                        else {
+                            char* buffer = reinterpret_cast<char*>(partition->addr);
 						//auto pdsi = &(partition->dsi);
 						//if (std::get<0>(key) == 3 && std::get<1>(key) == 3) {
 						//char fn[1024];
@@ -436,20 +463,20 @@ public:
 						//pwrite(fd, buffer, pdsi->_size, 0);
 						//close(fd);
 						//std::cout <<"DSI: filename: "<<pdsi->_filename<<" offset: "<<pdsi->_offset<<" size: "<<pdsi->_size<<std::endl;}
-						for (long pos=0;pos+edge_unit<=partition->dsi._size;pos+=edge_unit) {
-							Edge & e = *(Edge*)(buffer+pos);
+						    for (long pos=0;pos+edge_unit<=partition->dsi._size;pos+=edge_unit) {
+							    Edge & e = *(Edge*)(buffer+pos);
 							//if (pos < 5 * edge_unit)
 							//	std::cout<<"Source: " <<e.source<<" - Target: "<<e.target<<std::endl;
 							//if (e.source > 41652999 || e.target > 41652999)
 							//	std::cout<<"Overflow: "<<e.source<<" -> "<<e.target<<" pos = "<<pos<<" size = "<<partition->dsi._size<<std::endl;
-							if (bitmap==nullptr || bitmap->get_bit(e.source)) {
-								local_value += process(e);
-							}
-						}
-						release(partition);
+							    if (bitmap==nullptr || bitmap->get_bit(e.source)) {
+								    local_value += process(e);
+							    }
+						    }
+						    release(partition);
 						//if (!partition->release()) delete partition;
 						//std::cout <<"Finished: "<<pdsi->_filename<<" offset: "<<pdsi->_offset<<" size: "<<pdsi->_size<<std::endl;
-						
+					    }	
 					}
 					write_add(&value, local_value);
 					write_add(&read_bytes, local_read_bytes);
