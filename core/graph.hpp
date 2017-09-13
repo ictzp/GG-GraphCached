@@ -43,7 +43,7 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include "GraphCached.h"
 
 using namespace graphcached;
-#define PARTITION_TRACE 0
+#define PARTITION_TRACE 1
 
 bool f_true(VertexId v) {
 	return true;
@@ -486,7 +486,7 @@ public:
 			//posix_fadvise(fin, 0, 0, POSIX_FADV_SEQUENTIAL);
 
 #if PARTITION_TRACE == 1
-            int ftrace = open("gridgraph_wcc_partition_1m.trace", O_CREAT|O_WRONLY|O_APPEND, 0600);
+            int ftrace = open("gridgraph_mis_partition_1m.trace", O_CREAT|O_WRONLY|O_APPEND, 0600);
 #endif
 
 			for (int i=0;i<partitions;i++) {
