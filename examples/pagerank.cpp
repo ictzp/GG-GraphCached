@@ -112,5 +112,5 @@ int main(int argc, char ** argv) {
 
 	double end_time = get_time();
 	printf("%d iterations of pagerank took %.2f seconds\n", iterations, end_time - begin_time);
-
+    graph.stat();
 }

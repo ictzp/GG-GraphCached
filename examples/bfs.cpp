@@ -25,8 +25,8 @@ int main(int argc, char ** argv) {
 	VertexId start_vid = atoi(argv[2]);
 	long memory_bytes = (argc>=4)?atol(argv[3])*1024l*1024l*1024l:8l*1024l*1024l*1024l;
 
-	Graph graph(path);
-	graph.set_memory_bytes(memory_bytes);
+	Graph graph(path, memory_bytes);
+    graph.startCacheap();
 	Bitmap * active_in = graph.alloc_bitmap();
 	Bitmap * active_out = graph.alloc_bitmap();
 	BigVector<VertexId> parent(graph.path+"/parent", graph.vertices);
@@ -50,6 +50,7 @@ int main(int argc, char ** argv) {
 			if (parent[e.target]==-1) {
 				if (cas(&parent[e.target], -1, e.source)) {
 					active_out->set_bit(e.target);
+                    graph.laHint(e.target);
 					return 1;
 				}
 			}
@@ -63,5 +64,6 @@ int main(int argc, char ** argv) {
 	});
 	printf("discovered %d vertices from %d in %.2f seconds.\n", discovered_vertices, start_vid, end_time - start_time);
 
-	return 0;
+	graph.stat();
+    return 0;
 }
