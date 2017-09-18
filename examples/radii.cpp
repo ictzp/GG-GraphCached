@@ -26,8 +26,8 @@ int main(int argc, char ** argv) {
 	std::string path = argv[1];
 	long memory_bytes = ((argc>=3)?atol(argv[2]):8l) * (1024l*1024l*1024l);
 
-	Graph graph(path);
-	graph.set_memory_bytes(memory_bytes);
+	Graph graph(path, memory_bytes);
+	graph.startCacheap();
 	Bitmap * active_in = graph.alloc_bitmap();
 	Bitmap * active_out = graph.alloc_bitmap();
 	BigVector<unsigned long [2]> visited(graph.path+"/visited", graph.vertices);
@@ -70,6 +70,7 @@ int main(int argc, char ** argv) {
 				if (radii[e.target]!=iteration) {
 					if (cas(&radii[e.target], old_radii, iteration)) {
 						active_out->set_bit(e.target);
+                        graph.laHint(e.target);
 						return 1;
 					}
 				}
@@ -126,7 +127,8 @@ int main(int argc, char ** argv) {
 				if (radii[e.target]!=iteration) {
 					if (cas(&radii[e.target], old_radii, iteration)) {
 						active_out->set_bit(e.target);
-						return 1;
+						graph.laHint(e.target);
+                        return 1;
 					}
 				}
 			}
@@ -149,6 +151,7 @@ int main(int argc, char ** argv) {
 	printf("radii: %d\n", max_radii);
 	printf("time: %.2f seconds\n", end_time - start_time);
 
+    graph.stat();
 	return 0;
 }
 
