@@ -12,16 +12,16 @@ def get_pid(prog_name):
 
 def run_cc(filename, k):
 	#command = 'systemd-run -p MemoryLimit=' + str(k) + 'G -p LimitNOFILE=40000 --setenv=WorkingDirectory=/home/zhaopeng/graph/GridGraph -t' + ' ./bin/wcc ' + filename + ' ' + str(k)
-	command = 'systemd-run -p MemoryLimit=' + str(k) + 'G -p LimitNOFILE=40000 --setenv=LD_LIBRARY_PATH=/usr/local/lib --setenv=WorkingDirectory=/home/zhaopeng/graph/GG-GraphCached -t' + ' ./bin/wcc ' + str(k-1.5) + " " + filename
+	command = 'systemd-run -p MemoryLimit=' + str(k) + 'G -p LimitNOFILE=40000 --setenv=LD_LIBRARY_PATH=/usr/local/lib -t' + ' ./bin/wcc ' + str(k-1.5) + " " + filename
 	p = subprocess.Popen(command, stdout = subprocess.PIPE, shell = True)
 	pid = get_pid("./bin/wcc")
 	print pid
 	print "monitor starts"
-	moniter = subprocess.Popen(["/home/zhaopeng/graph/GG-GraphCached/tools/io_monitor.sh", pid, "wcc_2G_2_16G_directio_cacheap_1M_mru.result"])
+	moniter = subprocess.Popen(["/home/centos/GG-GraphCached/tools/io_monitor.sh", pid, "/data/results/io_wcc_twitter_4_16_cacheap.result"])
 	t = p.stdout.read()
 	moniter.kill()
 	print "monitor stops"
-	f = open("wcc_coldpagecache_2G_2_16G_twitter_directio_cacheap_1M_mru.result", "a")
+	f = open("/data/results/wcc_twitter_4_16_cacheap.result", "a")
 	f.write(t)
 	print t
 
@@ -33,10 +33,10 @@ def clear_pagecache():
 	subprocess.Popen(command, shell = True)
 	print 'page cahe cleared.'
 
-size = 2.5
-filename = "/home/zhaopeng/graph/data/twitter-2010.gg"
+size = 4
+filename = "/data/twi/"
 #filename = "/home/zhaopeng/graph/data/soc-LiveJournal1.txt"
-for sz in range(0, 16):	
+for sz in range(0, 4):	
 	clear_pagecache()
 	run_cc(filename, size)
-	size = size + 1
+	size = size + 4

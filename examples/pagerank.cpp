@@ -17,13 +17,13 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include "core/graph.hpp"
 
 int main(int argc, char ** argv) {
-	if (argc<3) {
+	if (argc<4) {
 		fprintf(stderr, "usage: pagerank [path] [iterations] [memory budget in GB]\n");
 		exit(-1);
 	}
 	std::string path = argv[1];
 	int iterations = atoi(argv[2]);
-	long memory_bytes = (argc>=4)?atol(argv[3])*1024l*1024l*1024l:8l*1024l*1024l*1024l;
+	long memory_bytes = (long)( atof(argv[3])*1024l*1024l*1024l);
 
 	Graph graph(path, memory_bytes);
 	graph.startCacheap();

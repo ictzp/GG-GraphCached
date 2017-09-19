@@ -19,12 +19,12 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #define K 64
 
 int main(int argc, char ** argv) {
-	if (argc<2) {
+	if (argc<3) {
 		fprintf(stderr, "usage: mis [path] [memory budget in GB]\n");
 		exit(-1);
 	}
 	std::string path = argv[1];
-	long memory_bytes = ((argc>=3)?atol(argv[2]):8l) * (1024l*1024l*1024l);
+	long memory_bytes = (long)(atof(argv[2]) * (1024l*1024l*1024l));
 
 	Graph graph(path, memory_bytes);
 	graph.startCacheap();

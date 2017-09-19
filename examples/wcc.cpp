@@ -23,7 +23,7 @@ int main(int argc, char ** argv) {
 	}
 	std::string path = argv[2];
 	//GraphCached_init(argc, argv);
-	uint64_t cacheSize = atoi(argv[1]) * 1024 * 1024 * 1024ull;
+	uint64_t cacheSize = uint64_t(atof(argv[1]) * 1024 * 1024 * 1024ull);
 	Graph graph(path, cacheSize);
 	graph.startCacheap();
 	Bitmap * active_in = graph.alloc_bitmap();
