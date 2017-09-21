@@ -34,7 +34,7 @@ int main(int argc, char ** argv) {
 	BigVector<VertexId> radii(graph.path+"/radii", graph.vertices);
 	graph.set_vertex_data_bytes( graph.vertices * ( sizeof(VertexId) + sizeof(long) * 2 ) );
 
-	srand(time(NULL));
+	srand(1);
 
 	double start_time = get_time();
 	int iteration;
@@ -98,54 +98,6 @@ int main(int argc, char ** argv) {
 	}
 	printf("radii:%d\n", max_radii);
 
-	active_out->clear();
-	graph.stream_vertices<VertexId>([&](VertexId i){
-		visited[i][0] = 0ul;
-		visited[i][1] = 0ul;
-		radii[i] = -1;
-		return 0;
-	});
-	for (int k=0;k<K;k++) {
-		VertexId vid = candidates[k];
-		visited[vid][1] |= (1ul << k);
-		radii[vid] = 0;
-		active_out->set_bit(vid);
-	}
-	iteration = 0;
-	active_vertices = K;
-	while (active_vertices > 0) {
-		iteration++;
-		printf("%7d: %d\n", iteration, active_vertices);
-		int now = iteration % 2;
-		int next = 1 - now;
-		std::swap(active_in, active_out);
-		active_out->clear();
-		active_vertices = graph.stream_edges<VertexId>([&](Edge & e) {
-			if (visited[e.target][now] != visited[e.source][now]) {
-				__sync_fetch_and_or( &visited[e.target][next], visited[e.source][now] );
-				VertexId old_radii = radii[e.target];
-				if (radii[e.target]!=iteration) {
-					if (cas(&radii[e.target], old_radii, iteration)) {
-						active_out->set_bit(e.target);
-						graph.laHint(e.target);
-                        return 1;
-					}
-				}
-			}
-			return 0;
-		}, active_in);
-		active_vertices = graph.stream_vertices<VertexId>([&](VertexId i){
-			visited[i][now] = visited[i][next];
-			return 1;
-		}, active_out); // necessary?
-	}
-	max_radii = 0;
-	for (VertexId i=0;i<graph.vertices;i++) {
-		if (max_radii < radii[i]) {
-			max_radii = radii[i];
-		}
-	}
-	printf("radii: %d\n", max_radii);
 
 	double end_time = get_time();
 	printf("radii: %d\n", max_radii);

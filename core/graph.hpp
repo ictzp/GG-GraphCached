@@ -43,7 +43,7 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include "GraphCached.h"
 
 using namespace graphcached;
-#define PARTITION_TRACE 1
+#define PARTITION_TRACE 0
 
 bool f_true(VertexId v) {
 	return true;
@@ -406,7 +406,8 @@ public:
 		case 0: // source oriented update
         {
             threads.clear();
-			for (int ti=0;ti<parallelism;ti++) {
+			BusyTimer bt;
+            for (int ti=0;ti<parallelism;ti++) {
 				threads.emplace_back([&](int thread_id){
 					T local_value = zero;
 					long local_read_bytes = 0;
@@ -414,24 +415,14 @@ public:
 					    laFlag[i] = 0;
 					}
 					while (true) {
-						//auto key = tasks.pop();
-						//if (std::get<0>(key)==-1) {
-						    //std::cout<<thread_id<<" exit"<<std::endl;
-						//    break;
-						//}
-						// CHECK: start position should be offset % edge_unit
-						//screen.lock();
-						//std::cout <<thread_id<<" : "<<std::get<0>(key) <<" "<<std::get<1>(key)<<" " <<std::get<2>(key) <<std::endl;	
-						//screen.unlock();
-					       
 						DiskComponent<KeyTy>* partition = get();
 						if (partition == nullptr) break;
-						//DiskComponent<KeyTy>* partition = read(key);
+                        bt.set_busy();
 						if (partition->part == 1) {
                             partition->pMutex.lock();
                             if (partition->part1 == 1) {
                                 char* buffer = reinterpret_cast<char*>(partition->addr);
-                                for (long pos=0; pos+edge_unit<=partition->curSize; pos+=edge_unit) {
+                                for (long pos=0; pos+edge_unit<=partition->preCurSize; pos+=edge_unit) {
                                     Edge & e = *(Edge*)(buffer+pos);
                                     if (bitmap==nullptr || bitmap->get_bit(e.source)) {
                                         local_value += process(e);
@@ -455,28 +446,15 @@ public:
                         }
                         else {
                             char* buffer = reinterpret_cast<char*>(partition->addr);
-						//auto pdsi = &(partition->dsi);
-						//if (std::get<0>(key) == 3 && std::get<1>(key) == 3) {
-						//char fn[1024];
-						//sprintf(fn, "%d-%d.bin", pdsi->_offset, pdsi->_size);
-						//int fd = open(fn, O_CREAT|O_WRONLY);
-						//pwrite(fd, buffer, pdsi->_size, 0);
-						//close(fd);
-						//std::cout <<"DSI: filename: "<<pdsi->_filename<<" offset: "<<pdsi->_offset<<" size: "<<pdsi->_size<<std::endl;}
 						    for (long pos=0;pos+edge_unit<=partition->dsi._size;pos+=edge_unit) {
 							    Edge & e = *(Edge*)(buffer+pos);
-							//if (pos < 5 * edge_unit)
-							//	std::cout<<"Source: " <<e.source<<" - Target: "<<e.target<<std::endl;
-							//if (e.source > 41652999 || e.target > 41652999)
-							//	std::cout<<"Overflow: "<<e.source<<" -> "<<e.target<<" pos = "<<pos<<" size = "<<partition->dsi._size<<std::endl;
 							    if (bitmap==nullptr || bitmap->get_bit(e.source)) {
 								    local_value += process(e);
 							    }
 						    }
 						    release(partition);
-						//if (!partition->release()) delete partition;
-						//std::cout <<"Finished: "<<pdsi->_filename<<" offset: "<<pdsi->_offset<<" size: "<<pdsi->_size<<std::endl;
-					    }	
+					    }
+                        bt.unset_busy();
 					}
 					write_add(&value, local_value);
 					write_add(&read_bytes, local_read_bytes);
@@ -521,10 +499,13 @@ public:
 			for (int i=0;i<parallelism;i++) {
 				request(std::make_tuple(-1, 0, 0));
 			}
-			for (int i=0;i<parallelism;i++) {
+            auto startT = get_time();
+            for (int i=0;i<parallelism;i++) {
 				threads[i].join();
 			}
-		        release(nullptr);	
+		    release(nullptr);
+            std::cout<<"totalT: "<<get_time()-startT<<std::endl;
+            std::cout<<"computeT: "<<bt.get_sum()<<std::endl;
 			break;
         }
 		case 1: // target oriented update

@@ -69,7 +69,7 @@ int main(int argc, char ** argv) {
 			[&](Edge & e){
 				write_add(&sum[e.target], pagerank[e.source]);
 				return 0;
-			}, nullptr, 0, 1,
+			}, nullptr, 0, 0,
 			[&](std::pair<VertexId,VertexId> source_vid_range){
 				pagerank.lock(source_vid_range.first, source_vid_range.second);
 			},
