@@ -17,14 +17,15 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include "core/graph.hpp"
 
 int main(int argc, char ** argv) {
-	if (argc != 3) {
-		fprintf(stderr, "usage: wcc [memory budget in GB] [path]\n");
+	if (argc != 4) {
+		fprintf(stderr, "usage: wcc [memory budget in GB] [path] [cache line size power]\n");
 		exit(-1);
 	}
 	std::string path = argv[2];
 	//GraphCached_init(argc, argv);
 	uint64_t cacheSize = uint64_t(atof(argv[1]) * 1024 * 1024 * 1024ull);
-	Graph graph(path, cacheSize);
+    int clsp = atoi(argv[3]);
+	Graph graph(path, cacheSize, clsp);
 	graph.startCacheap();
 	Bitmap * active_in = graph.alloc_bitmap();
 	Bitmap * active_out = graph.alloc_bitmap();

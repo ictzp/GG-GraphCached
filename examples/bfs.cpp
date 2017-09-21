@@ -17,15 +17,16 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #include "core/graph.hpp"
 
 int main(int argc, char ** argv) {
-	if (argc<4) {
-		fprintf(stderr, "usage: bfs [path] [start vertex id] [memory budget in GB]\n");
+	if (argc<5) {
+		fprintf(stderr, "usage: bfs [path] [start vertex id] [memory budget in GB] [cache line size power]\n");
 		exit(-1);
 	}
 	std::string path = argv[1];
 	VertexId start_vid = atoi(argv[2]);
 	long memory_bytes = (long)(atof(argv[3])*1024l*1024l*1024l);
+    int clsp = atoi(argv[4]);
 
-	Graph graph(path, memory_bytes);
+	Graph graph(path, memory_bytes, clsp);
     graph.startCacheap();
 	Bitmap * active_in = graph.alloc_bitmap();
 	Bitmap * active_out = graph.alloc_bitmap();

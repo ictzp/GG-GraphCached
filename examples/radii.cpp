@@ -19,14 +19,15 @@ Copyright (c) 2014-2015 Xiaowei Zhu, Tsinghua University
 #define K 64
 
 int main(int argc, char ** argv) {
-	if (argc<3) {
-		fprintf(stderr, "usage: mis [path] [memory budget in GB]\n");
+	if (argc<4) {
+		fprintf(stderr, "usage: mis [path] [memory budget in GB] [cache line size power]\n");
 		exit(-1);
 	}
 	std::string path = argv[1];
 	long memory_bytes = (long)(atof(argv[2]) * (1024l*1024l*1024l));
+    int clsp = atoi(argv[3]);
 
-	Graph graph(path, memory_bytes);
+	Graph graph(path, memory_bytes, clsp);
 	graph.startCacheap();
 	Bitmap * active_in = graph.alloc_bitmap();
 	Bitmap * active_out = graph.alloc_bitmap();
